@@ -3,7 +3,8 @@ vim.opt.signcolumn = "yes:1"
 vim.opt.cursorlineopt = "number"
 vim.opt.winborder = "rounded"
 vim.opt.clipboard = "unnamedplus"
-vim.opt.completeopt = "menu,menuone,noinsert,noselect"
+vim.opt.completeopt = "menu,menuone,noinsert"
+vim.opt.pumheight = 10
 vim.opt.fillchars = { diff = "╱" }
 vim.opt.number = true
 vim.opt.undofile = true
@@ -35,7 +36,7 @@ require("mason").setup()
 require("tokyonight").setup({ opts = { transparent = true } })
 require("oil").setup({ view_options = { show_hidden = true } })
 require("nvim-treesitter.configs").setup({
-  ensure_installed = { "python", "lua", "bash" },
+  ensure_installed = { "python", "lua", "bash", "markdown", "markdown_inline" },
   highlight = { enable = true }
 })
 
@@ -44,7 +45,7 @@ vim.cmd(":hi statusline guibg=NONE")
 
 vim.keymap.set("n", "<leader>e", "<cmd>Oil<CR>")
 vim.keymap.set("n", "<leader>g", "<cmd>Git<CR>")
-vim.keymap.set("n", "<leader>t", "<cmd>vert term<CR>")
+vim.keymap.set("n", "<leader>t", "<cmd>terminal<CR>")
 vim.keymap.set("n", "<leader>f", "<cmd>Pick files<CR>")
 vim.keymap.set("n", "<leader>h", "<cmd>Pick help<CR>")
 vim.keymap.set("n", "<leader>.", "<cmd>edit $MYVIMRC<CR>")
@@ -57,20 +58,15 @@ vim.keymap.set("t", "<Esc>", "<c-\\><c-n>")
 vim.keymap.set("t", "<C-w>q", "<c-\\><c-n><c-w>q")
 
 vim.api.nvim_create_autocmd('LspAttach', {
-  callback = function(ev)
-    local client = vim.lsp.get_client_by_id(ev.data.client_id)
+  group = vim.api.nvim_create_augroup('my.lsp', {}),
+  callback = function(args)
+    local client = assert(vim.lsp.get_client_by_id(args.data.client_id))
     if client:supports_method('textDocument/completion') then
-      vim.lsp.completion.enable(true, client.id, ev.buf, { autotrigger = true })
+      local chars = {}; for i = 32, 126 do table.insert(chars, string.char(i)) end
+      client.server_capabilities.completionProvider.triggerCharacters = chars
+      vim.lsp.completion.enable(true, client.id, args.buf, { autotrigger = true })
     end
-    if client:supports_method('textDocument/formatting') then
-      vim.api.nvim_create_autocmd("BufWritePre", {
-        buffer = ev.buf,
-        callback = function()
-          vim.lsp.buf.format()
-        end
-      })
-    end
-  end
+  end,
 })
 
 vim.api.nvim_create_autocmd("TextYankPost", {
@@ -85,4 +81,12 @@ vim.opt.foldmethod = "expr"
 vim.opt.foldexpr = "v:lua.vim.treesitter.foldexpr()"
 
 vim.diagnostic.config({ virtual_text = true })
-vim.lsp.enable({ "lua_ls", "basedpyright", "ruff" })
+vim.lsp.enable({ "lua_ls", "basedpyright", "ruff", "denols", "jsonls"})
+
+vim.keymap.set("i", "<CR>", function()
+  if vim.fn.pumvisible() == 1 then
+    return "<C-e><CR>"
+  else
+    return "<CR>"
+  end
+end, { expr = true })
