@@ -1,2 +1,4 @@
 lsp/*
 .luarc.json
+.gitignore
+README.md
