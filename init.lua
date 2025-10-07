@@ -25,7 +25,11 @@ vim.pack.add({
   { src = "https://github.com/mason-org/mason.nvim" },
   { src = "https://github.com/stevearc/oil.nvim" },
   { src = "https://github.com/tpope/vim-fugitive" },
+  { src = "https://github.com/tpope/vim-surround" },
+  { src = "https://github.com/vimwiki/vimwiki" }
 })
+vim.g.vimwiki_list = { { path = "~/Documents/Vimwiki", syntax = "markdown", ext = ".md" } }
+vim.g.vimwiki_global_ext = 0
 
 local choose_all = function()
   local mappings = require("mini.pick").get_picker_opts().mappings
@@ -33,8 +37,8 @@ local choose_all = function()
 end
 
 require("mason").setup()
-require("mini.surround").setup()
 require("mini.pairs").setup()
+require("mini.diff").setup()
 require("oil").setup({ view_options = { show_hidden = true } })
 require("tokyonight").setup({ opts = { transparent = true } })
 require('mini.pick').setup({
@@ -49,16 +53,18 @@ require("nvim-treesitter.configs").setup({
 vim.cmd [[colorscheme tokyonight-moon]]
 vim.cmd [[set statusline+=\ \|%n\|]]
 vim.cmd [[ hi statusline guibg=NONE ]]
+vim.keymap.set("n", "æ", ":")
+vim.keymap.set("n", "U", "<C-R>")
+vim.keymap.set("n", "<C-n>", "<cmd>bnext<cr>")
+vim.keymap.set("n", "<C-p>", "<cmd>bprevious<cr>")
+vim.keymap.set("n", "<leader>t", "q:")
 vim.keymap.set("n", "<leader>e", "<cmd>Oil<cr>")
 vim.keymap.set("n", "<leader>g", "<cmd>Git<cr>")
-vim.keymap.set("n", "<leader>t", "<cmd>bot terminal<cr>i")
-vim.keymap.set("n", "<Backspace>", ":nohl<cr>")
 vim.keymap.set("n", "<leader>f", "<cmd>Pick files<cr>")
 vim.keymap.set("n", "<leader>r", "<cmd>Pick grep_live<cr>")
 vim.keymap.set("n", "<leader>js", vim.lsp.buf.format)
 vim.keymap.set("n", "<leader>q", require("mini.bufremove").delete)
-vim.keymap.set("n", "<C-n>", "<cmd>bnext<cr>")
-vim.keymap.set("n", "<C-p>", "<cmd>bprevious<cr>")
+vim.keymap.set("n", "<Backspace>", ":nohl<cr>")
 vim.keymap.set("v", "J", ":m '>+1<cr>gv=gv")
 vim.keymap.set("v", "K", ":m '<-2<cr>gv=gv")
 vim.keymap.set("t", "<Esc>", "<c-\\><c-n>")
